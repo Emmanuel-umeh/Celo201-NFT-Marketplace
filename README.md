@@ -6,7 +6,7 @@
 MegaKitties
  
 ## Live Preview
-[Demo](https://nft-marketplace-ui.netlify.app/)
+[Demo](https://megakitties.herokuapp.com)
 
 ## Build Setup
 
