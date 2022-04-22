@@ -3,7 +3,7 @@ import Image from '../../assets/Image.png'
 import {useEffect, useState} from "react";
 import {create as ipfsHttpClient} from 'ipfs-http-client'
 import {useMarketContract} from "../../hooks/useMarketContract";
-import {BigNumber, ethers} from "ethers";
+import {ethers} from "ethers";
 
 import CircleLoader from "react-spinners/ClipLoader";
 import {useContractKit} from "@celo-tools/use-contractkit";
@@ -85,7 +85,7 @@ const Create = () => {
 
 
         // mint nft
-       const tx =  await marketplace.methods.createToken(uri,listingPrice ).send({
+       await marketplace.methods.createToken(uri,listingPrice ).send({
             from:defaultAccount
         })
 

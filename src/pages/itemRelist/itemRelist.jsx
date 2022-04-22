@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './itemRelist.css'
 import axios from "axios";
 import {ethers} from "ethers";
@@ -14,10 +14,18 @@ const ItemRelist = () => {
     const [nftData, setNftData] = useState({});
     const {address, performActions} = useContractKit()
 
+
+    const fetchNft = useCallback(async () => {
+        const tokenUri = await marketplace.methods.tokenURI(id).call()
+        let meta = await axios.get(tokenUri)
+        meta.data.owner =  await marketplace.methods.getNftOwner(id).call()
+        setNftData(meta.data)
+    }, [marketplace, id])
+
     const navigate = useNavigate()
     useEffect(() => {
         if (marketplace) fetchNft()
-    }, [marketplace]);
+    }, [marketplace, fetchNft]);
 
 
     // const [newPrice, setNewPrice] = useState(0);
@@ -28,7 +36,7 @@ const ItemRelist = () => {
                 return alert("Enter a valid price")
             }
             const priceFormatted = (ethers.utils.parseUnits(nftData.price, 'ether')).toString()
-            let transaction = await marketplace.methods.resellToken(id, priceFormatted).send({
+            await marketplace.methods.resellToken(id, priceFormatted).send({
                 from: address
             })
             alert("NFT listed for sale!")
@@ -40,12 +48,6 @@ const ItemRelist = () => {
 
     }
 
-    const fetchNft = async () => {
-        const tokenUri = await marketplace.methods.tokenURI(id).call()
-        let meta = await axios.get(tokenUri)
-        meta.data.owner =  await marketplace.methods.getNftOwner(id).call()
-        setNftData(meta.data)
-    }
 
     const purchaseNft = async () => {
 
@@ -56,7 +58,7 @@ const ItemRelist = () => {
                 const {defaultAccount} = kit;
                 /* user will be prompted to pay the asking proces to complete the transaction */
                 const price = (ethers.utils.parseUnits(nftData.price, 'ether')).toString()
-                const transaction = await marketplace.methods.createMarketSale(id).send({
+                await marketplace.methods.createMarketSale(id).send({
                     from: defaultAccount,
                     value: price
                 })
@@ -93,7 +95,7 @@ const ItemRelist = () => {
                     <p>{nftData.description}</p>
                 </div>
 
-                {nftData.owner == address ?
+                {nftData.owner === address ?
                     <form className='writeForm' autoComplete='off' onSubmit={(e)=>e.preventDefault()}>
 
                         <div className="formGroup">

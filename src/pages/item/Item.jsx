@@ -1,7 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './item.css'
-import creator from '../../assets/seller2.png'
-import item from '../../assets/item1.png'
 import axios from "axios";
 import {ethers} from "ethers";
 import {useParams} from "react-router";
@@ -16,16 +14,16 @@ const Item = () => {
     const [nftData, setNftData] = useState({});
     const {address, performActions} = useContractKit()
 
-    const navigate = useNavigate()
-    useEffect(() => {
-        if (marketplace ) fetchNft()
-    }, [marketplace]);
-
-    const fetchNft = async () => {
+    const fetchNft = useCallback(async () => {
         const tokenUri = await marketplace.methods.tokenURI(id).call()
         const meta = await axios.get(tokenUri)
         setNftData(meta.data)
-    }
+    }, [marketplace, id])
+
+    const navigate = useNavigate()
+    useEffect(() => {
+        if (marketplace ) fetchNft()
+    }, [marketplace, fetchNft]);
 
     const purchaseNft = async () => {
 
@@ -37,7 +35,7 @@ const Item = () => {
             /* user will be prompted to pay the asking proces to complete the transaction */
             const price =( ethers.utils.parseUnits(nftData.price, 'ether')).toString()
             console.log({price})
-            const transaction = await marketplace.methods.createMarketSale(id).send({
+            await marketplace.methods.createMarketSale(id).send({
                 from: defaultAccount,
                 value: price
             })
