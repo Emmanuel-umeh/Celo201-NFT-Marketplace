@@ -1,29 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './profile.css'
 import profile_banner from '../../assets/profile_banner.png'
 import Nfts from '../../components/nfts/Nfts'
-import {useContractKit} from "@celo-tools/use-contractkit";
 import {useMarketContract} from "../../hooks/useMarketContract";
 import axios from "axios";
 import {ethers} from "ethers";
 
 const Profile = () => {
 
-    const {address, connect, performActions} = useContractKit()
     const marketplace = useMarketContract()
 
-
     const [nfts, setNfts] = useState([]);
-    const [soldNfts, setSoldNfts] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (marketplace) {
-            loadNFTs()
-        }
-    }, [ marketplace]);
-
-    const loadNFTs = async () => {
+    const loadNFTs = useCallback(async () => {
         setLoading(true)
         try {
             const data = await marketplace.methods.fetchMyNFTs().call()
@@ -52,9 +42,13 @@ const Profile = () => {
         } finally {
             setLoading(false)
         }
+    }, [marketplace])
 
-
-    }
+    useEffect(() => {
+        if (marketplace) {
+            loadNFTs()
+        }
+    }, [ marketplace, loadNFTs]);
 
 
     return (
